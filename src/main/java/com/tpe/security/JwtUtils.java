@@ -1,21 +1,20 @@
 package com.tpe.security;
 
-import com.tpe.security.service.UserDetailsImpl;
+import com.tpe.security.service.*;
 import io.jsonwebtoken.*;
+import org.springframework.security.core.*;
+import org.springframework.stereotype.*;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
-
-import javax.persistence.Column;
-import java.util.Date;
+import java.util.*;
 
 @Component
 public class JwtUtils {
+    // 1 : JWT generate
+    // 2: JWT valide
+    // 3 : JWT --> userName
+    private String jwtSecret = "sboot";
 
-    private String jwtSecret ="sBoot";
-
-    private long jwtExpirationMs =86400000L;
-
+    private  long jwtExpirationMs = 86400000;   // 24*60*60*1000
 
     // !!! ************ GENERATE TOKEN *****************
     public String generateToken(Authentication authentication) {
@@ -28,6 +27,7 @@ public class JwtUtils {
                 signWith(SignatureAlgorithm.HS512, jwtSecret).
                 compact();
     }
+
     // !!! ****************** VALIDATE TOKEN ***************************
     public boolean validateToken(String token){
 
@@ -35,7 +35,7 @@ public class JwtUtils {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            e.printStackTrace();
+           e.printStackTrace();
         } catch (UnsupportedJwtException e) {
             e.printStackTrace();
         } catch (MalformedJwtException e) {
@@ -46,6 +46,15 @@ public class JwtUtils {
             e.printStackTrace();
         }
         return false ;
+    }
+
+    // !!! ********** JWT tokenden userName'i alalım ************
+    public String getUserNameFromJwtToken(String token) {
+        return Jwts.parser().
+                setSigningKey(jwtSecret).
+                parseClaimsJws(token).
+                getBody().
+                getSubject();
     }
 
 }
